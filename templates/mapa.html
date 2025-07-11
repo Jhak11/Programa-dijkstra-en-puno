@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8' />
+    <title>Rutas a Hospitales - Dijkstra</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+        .mapboxgl-popup-content { max-width: 300px; }
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 5px;
+            max-width: 300px;
+            z-index: 1000;
+        }
+        .route-info {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .shortest-route {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .normal-route {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .legend {
+            position: absolute;
+            bottom: 30px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .legend-color {
+            width: 20px;
+            height: 3px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id='map'></div>
+    
+    <div class='info-panel'>
+        <h3>Rutas a Hospitales</h3>
+        <div id='route-list'></div>
+        <div style='margin-top: 10px; padding-top: 10px; border-top: 1px solid #ccc;'>
+            <strong>Estadísticas:</strong><br>
+            <small>
+                Rutas calculadas: 10<br>
+                Distancia mínima: 370m<br>
+                Distancia máxima: 3045m
+            </small>
+        </div>
+    </div>
+    
+    <div class='legend'>
+        <div class='legend-item'>
+            <div class='legend-color' style='background-color: #00FF00;'></div>
+            <span>Ruta más corta</span>
+        </div>
+        <div class='legend-item'>
+            <div class='legend-color' style='background-color: #FF0000;'></div>
+            <span>Otras rutas</span>
+        </div>
+        <div class='legend-item'>
+            <div class='legend-color' style='background-color: #0000FF; height: 10px; border-radius: 50%;'></div>
+            <span>Origen</span>
+        </div>
+        <div class='legend-item'>
+            <div class='legend-color' style='background-color: #FF0000; height: 10px; border-radius: 50%;'></div>
+            <span>Hospitales</span>
+        </div>
+    </div>
+
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoiamhhayIsImEiOiJjbWN0bHFiazYwM3o2MmpvZTFvdWx0a3hnIn0.FIhmNofEVuFA01Az4uIo5Q';
+        
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [-70.02617695, -15.835634899999999],
+            zoom: 12
+        });
+
+        
+
+        
+        map.on('load', function() {
+            // Agregar rutas
+            const rutasData = [{"type": "Feature", "properties": {"title": "Clinica Las Kalas", "distance": "712 m", "time": "9.5 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0196505, -15.8447516], [-70.0198388, -15.844684], [-70.0203377, -15.8450023], [-70.0206983, -15.8439157], [-70.0208016, -15.8439688], [-70.021605, -15.8444469], [-70.0220318, -15.8446846], [-70.0231479, -15.8434575]]}}, {"type": "Feature", "properties": {"title": "4 de Noviembre", "distance": "2.90 km", "time": "38.7 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0184299, -15.8444111], [-70.0186857, -15.8436101], [-70.0187078, -15.8435438], [-70.018912, -15.8429317], [-70.0191535, -15.8421985], [-70.0195715, -15.8410178], [-70.0196587, -15.8410434], [-70.0199729, -15.8411328], [-70.0204789, -15.8412811], [-70.0207374, -15.8405403], [-70.020952, -15.839922], [-70.0215998, -15.8401813], [-70.0219245, -15.8400104], [-70.022253, -15.838866], [-70.0222791, -15.8387775], [-70.0223651, -15.8388081], [-70.023636, -15.8386972], [-70.0237364, -15.8386405], [-70.024396, -15.8382674], [-70.0248245, -15.8378796], [-70.0251881, -15.837542], [-70.0252787, -15.8374645], [-70.0256497, -15.8371361], [-70.0256858, -15.8370943], [-70.0257462, -15.8371156], [-70.0257834, -15.8371518], [-70.0260439, -15.8371759], [-70.0264578, -15.8361932], [-70.0268311, -15.835307], [-70.0274438, -15.8338771], [-70.0276613, -15.833276], [-70.0279416, -15.8326821], [-70.0279597, -15.8326434], [-70.0280766, -15.8323365], [-70.029157, -15.8299158], [-70.0292427, -15.8297077], [-70.0288826, -15.8296302], [-70.0288489, -15.8291929], [-70.028905, -15.828518], [-70.028983, -15.82834], [-70.0291585, -15.8280927], [-70.029265, -15.8279632], [-70.0291381, -15.8274925], [-70.0291281, -15.8274521], [-70.0289944, -15.8270181], [-70.0288704, -15.8265372], [-70.0289036, -15.8258341], [-70.0290088, -15.8254672], [-70.0291205, -15.8251326], [-70.0292473, -15.8247862]]}}, {"type": "Feature", "properties": {"title": "Jose Antonio Encinas", "distance": "2.33 km", "time": "31.1 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0196505, -15.8447516], [-70.0198388, -15.844684], [-70.0203377, -15.8450023], [-70.0204392, -15.8450543], [-70.0211309, -15.8455332], [-70.0217856, -15.8459377], [-70.0219693, -15.8458286], [-70.0220221, -15.8458346], [-70.0221743, -15.8459795], [-70.0221749, -15.8460118], [-70.0231429, -15.846246], [-70.0238999, -15.8457717], [-70.0242052, -15.8459295], [-70.0252162, -15.8464836], [-70.0258161, -15.8459294], [-70.0261863, -15.8456623], [-70.0269564, -15.8450903], [-70.0278238, -15.8447043], [-70.0287047, -15.8445179], [-70.0294542, -15.8442011], [-70.029966, -15.8439718], [-70.0304184, -15.8437832], [-70.0310115, -15.8435873], [-70.0315048, -15.8434199], [-70.0319027, -15.8432306], [-70.0323798, -15.842776], [-70.03245, -15.8426997], [-70.0328752, -15.8422376], [-70.0329492, -15.8421495], [-70.0332038, -15.8418803], [-70.0334307, -15.841586], [-70.0334833, -15.8415102], [-70.0335474, -15.8414804], [-70.0349919, -15.840859], [-70.03523, -15.8405103], [-70.03526, -15.8404418], [-70.0354652, -15.8400034], [-70.0349136, -15.8389941]]}}, {"type": "Feature", "properties": {"title": "Metropolitano Puno", "distance": "370 m", "time": "4.9 min", "color": "#00FF00", "is_shortest": true}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0196505, -15.8447516], [-70.0198388, -15.844684], [-70.0203377, -15.8450023], [-70.0206983, -15.8439157], [-70.0207471, -15.8437559], [-70.0208569, -15.8437879]]}}, {"type": "Feature", "properties": {"title": "Vallecito", "distance": "1.95 km", "time": "26.0 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0184299, -15.8444111], [-70.0186857, -15.8436101], [-70.017874, -15.8433664], [-70.0179031, -15.8432915], [-70.0176607, -15.8423959], [-70.0176308, -15.842035], [-70.0176559, -15.8417222], [-70.0176731, -15.8414032], [-70.017681, -15.8413196], [-70.0177024, -15.8404642], [-70.0176662, -15.8400668], [-70.0175536, -15.8394411], [-70.0174892, -15.8389973], [-70.017634, -15.838596], [-70.0177829, -15.8371265], [-70.0178084, -15.8365227], [-70.0178097, -15.8364143], [-70.0178365, -15.8355744], [-70.0181436, -15.8344992], [-70.0181842, -15.8343912], [-70.0186019, -15.8333565], [-70.018685, -15.8331676], [-70.019128, -15.8320521], [-70.0192227, -15.8318081], [-70.0190698, -15.8299992], [-70.0192826, -15.8298383], [-70.019478, -15.8299878], [-70.0197763, -15.830218], [-70.0204821, -15.8294481]]}}, {"type": "Feature", "properties": {"title": "Centro de Atenci\u00f3n de Medicina Complementaria", "distance": "1.84 km", "time": "24.6 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0184299, -15.8444111], [-70.0186857, -15.8436101], [-70.0187078, -15.8435438], [-70.018912, -15.8429317], [-70.0191535, -15.8421985], [-70.0195715, -15.8410178], [-70.0200826, -15.8395805], [-70.0205766, -15.8381714], [-70.0207752, -15.837626], [-70.0208066, -15.8375239], [-70.0211343, -15.8365091], [-70.0214003, -15.8356452], [-70.021432, -15.8355569], [-70.0216816, -15.8348271], [-70.0218598, -15.8342638], [-70.0220787, -15.833559], [-70.0221076, -15.833447], [-70.022297, -15.8327634], [-70.0223661, -15.83278], [-70.0229646, -15.8329144], [-70.0235698, -15.8330549], [-70.0240518, -15.8331669], [-70.0241526, -15.8331867], [-70.0249582, -15.8333484], [-70.0251493, -15.8333876], [-70.0255303, -15.8334658], [-70.0259453, -15.833551], [-70.0264532, -15.8336518], [-70.0265146, -15.8336657], [-70.0266254, -15.833691]]}}, {"type": "Feature", "properties": {"title": "Hospital Manuel N\u00fa\u00f1ez Butr\u00f3n", "distance": "483 m", "time": "6.4 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0196505, -15.8447516], [-70.0198388, -15.844684], [-70.0203377, -15.8450023], [-70.0206983, -15.8439157], [-70.0207471, -15.8437559], [-70.0210447, -15.8427799], [-70.0211538, -15.842817]]}}, {"type": "Feature", "properties": {"title": "Centro de Atencion Primaria III Metropolitano de Puno", "distance": "986 m", "time": "13.2 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0196505, -15.8447516], [-70.0198388, -15.844684], [-70.0203377, -15.8450023], [-70.0206983, -15.8439157], [-70.0208016, -15.8439688], [-70.021605, -15.8444469], [-70.0220318, -15.8446846], [-70.0231479, -15.8434575], [-70.0235667, -15.8427542], [-70.0238691, -15.8424112], [-70.0250058, -15.8429066]]}}, {"type": "Feature", "properties": {"title": "Hospital I Clinica Universitaria UNA - EsSalud", "distance": "2.39 km", "time": "31.9 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0184299, -15.8444111], [-70.0186857, -15.8436101], [-70.017874, -15.8433664], [-70.0179031, -15.8432915], [-70.0176607, -15.8423959], [-70.0176308, -15.842035], [-70.0176559, -15.8417222], [-70.0176731, -15.8414032], [-70.017681, -15.8413196], [-70.0177024, -15.8404642], [-70.0176662, -15.8400668], [-70.0175536, -15.8394411], [-70.0174892, -15.8389973], [-70.017634, -15.838596], [-70.0177829, -15.8371265], [-70.0178084, -15.8365227], [-70.0178097, -15.8364143], [-70.0178365, -15.8355744], [-70.0181436, -15.8344992], [-70.0181842, -15.8343912], [-70.0186019, -15.8333565], [-70.018685, -15.8331676], [-70.019128, -15.8320521], [-70.0192227, -15.8318081], [-70.0190698, -15.8299992], [-70.0187042, -15.8297282], [-70.0168887, -15.8282947], [-70.0170719, -15.8277067], [-70.017202, -15.8272854], [-70.0174462, -15.8264085], [-70.0178817, -15.8255912]]}}, {"type": "Feature", "properties": {"title": "Sanidad PNP", "distance": "3.04 km", "time": "40.6 min", "color": "#FF0000", "is_shortest": false}, "geometry": {"type": "LineString", "coordinates": [[-70.0185125, -15.8444354], [-70.0184299, -15.8444111], [-70.0186857, -15.8436101], [-70.0187078, -15.8435438], [-70.018912, -15.8429317], [-70.0191535, -15.8421985], [-70.0195715, -15.8410178], [-70.0196587, -15.8410434], [-70.0199729, -15.8411328], [-70.0204789, -15.8412811], [-70.0207374, -15.8405403], [-70.020952, -15.839922], [-70.0215998, -15.8401813], [-70.0219245, -15.8400104], [-70.022253, -15.838866], [-70.0222791, -15.8387775], [-70.0223651, -15.8388081], [-70.023636, -15.8386972], [-70.0237364, -15.8386405], [-70.024396, -15.8382674], [-70.0248245, -15.8378796], [-70.0251881, -15.837542], [-70.0252787, -15.8374645], [-70.0256497, -15.8371361], [-70.0256858, -15.8370943], [-70.0257462, -15.8371156], [-70.0257834, -15.8371518], [-70.0260439, -15.8371759], [-70.0264578, -15.8361932], [-70.0268311, -15.835307], [-70.0274438, -15.8338771], [-70.0276613, -15.833276], [-70.0279416, -15.8326821], [-70.0280131, -15.8327035], [-70.0291752, -15.8328536], [-70.0294644, -15.8328664], [-70.0304859, -15.8296289], [-70.0326543, -15.8286244], [-70.0333093, -15.8284452], [-70.0334988, -15.8287351], [-70.0341034, -15.8278673], [-70.0341151, -15.8276045]]}}];
+            const marcadoresData = [{"coordinates": [-70.0185125, -15.8444354], "title": "Punto de Origen", "color": "#0000FF"}, {"coordinates": [-70.0233202, -15.8431191], "title": "Clinica Las Kalas", "description": "Distancia: 712 m<br>Tiempo: 9.5 min", "color": "#FF0000", "is_closest": false}, {"coordinates": [-70.0290317, -15.8248667], "title": "4 de Noviembre", "description": "Distancia: 2.90 km<br>Tiempo: 38.7 min", "color": "#FF0000", "is_closest": false}, {"coordinates": [-70.035045, -15.83875], "title": "Jose Antonio Encinas", "description": "Distancia: 2.33 km<br>Tiempo: 31.1 min", "color": "#FF0000", "is_closest": false}, {"coordinates": [-70.0213117, -15.8434283], "title": "Metropolitano Puno", "description": "Distancia: 370 m<br>Tiempo: 4.9 min", "color": "#FF0000", "is_closest": true}, {"coordinates": [-70.020545, -15.8294117], "title": "Vallecito", "description": "Distancia: 1.95 km<br>Tiempo: 26.0 min", "color": "#FF0000", "is_closest": false}, {"coordinates": [-70.0269217, -15.8338206], "title": "Centro de Atenci\u00f3n de Medicina Complementaria", "description": "Distancia: 1.84 km<br>Tiempo: 24.6 min", "color": "#FF0000", "is_closest": false}, {"coordinates": [-70.0220475, -15.8431432], "title": "Hospital Manuel N\u00fa\u00f1ez Butr\u00f3n", "description": "Distancia: 483 m<br>Tiempo: 6.4 min", "color": "#FF0000", "is_closest": false}, {"coordinates": [-70.025694, -15.8427135], "title": "Centro de Atencion Primaria III Metropolitano de Puno", "description": "Distancia: 986 m<br>Tiempo: 13.2 min", "color": "#FF0000", "is_closest": false}, {"coordinates": [-70.0176726, -15.8253702], "title": "Hospital I Clinica Universitaria UNA - EsSalud", "description": "Distancia: 2.39 km<br>Tiempo: 31.9 min", "color": "#FF0000", "is_closest": false}, {"coordinates": [-70.0342968, -15.8275722], "title": "Sanidad PNP", "description": "Distancia: 3.04 km<br>Tiempo: 40.6 min", "color": "#FF0000", "is_closest": false}];
+            
+            // Agregar fuente de datos para rutas
+            map.addSource('rutas', {
+                'type': 'geojson',
+                'data': {
+                    'type': 'FeatureCollection',
+                    'features': rutasData
+                }
+            });
+        
+            
+            // Agregar capa de rutas
+            map.addLayer({
+                'id': 'rutas',
+                'type': 'line',
+                'source': 'rutas',
+                'layout': {
+                    'line-join': 'round',
+                    'line-cap': 'round'
+                },
+                'paint': {
+                    'line-color': ['get', 'color'],
+                    'line-width': [
+                        'case',
+                        ['get', 'is_shortest'],
+                        4,
+                        2
+                    ],
+                    'line-opacity': 0.8
+                }
+            });
+            
+            // Agregar marcadores
+            marcadoresData.forEach(function(marcador) {
+                const el = document.createElement('div');
+                el.className = 'marker';
+                el.style.backgroundColor = marcador.color;
+                el.style.width = marcador.is_closest ? '15px' : '10px';
+                el.style.height = marcador.is_closest ? '15px' : '10px';
+                el.style.borderRadius = '50%';
+                el.style.border = '2px solid white';
+                el.style.boxShadow = '0 0 5px rgba(0,0,0,0.3)';
+                
+                const popup = new mapboxgl.Popup({ offset: 25 })
+                    .setHTML(`<h3>${marcador.title}</h3>${marcador.description || ''}`);
+                
+                new mapboxgl.Marker(el)
+                    .setLngLat(marcador.coordinates)
+                    .setPopup(popup)
+                    .addTo(map);
+            });
+
+            
+            
+            // Agregar información de rutas al panel
+            const routeList = document.getElementById('route-list');
+            rutasData.forEach(function(ruta) {
+                const routeDiv = document.createElement('div');
+                routeDiv.className = `route-info ${ruta.properties.is_shortest ? 'shortest-route' : 'normal-route'}`;
+                routeDiv.innerHTML = `
+                    <strong>${ruta.properties.title}</strong><br>
+                    <small>Distancia: ${ruta.properties.distance}</small><br>
+                    <small>Tiempo: ${ruta.properties.time}</small>
+                    ${ruta.properties.is_shortest ? '<br><small><strong>★ MÁS CERCANO</strong></small>' : ''}
+                `;
+                routeList.appendChild(routeDiv);
+            });
+            
+            // Popup para rutas
+            map.on('click', 'rutas', function(e) {
+                const properties = e.features[0].properties;
+                new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(`
+                        <h3>${properties.title}</h3>
+                        <p>Distancia: ${properties.distance}</p>
+                        <p>Tiempo: ${properties.time}</p>
+                        ${properties.is_shortest ? '<p><strong>★ Ruta más corta</strong></p>' : ''}
+                    `)
+                    .addTo(map);
+            });
+            
+            // Cambiar cursor al pasar sobre rutas
+            map.on('mouseenter', 'rutas', function() {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            
+            map.on('mouseleave', 'rutas', function() {
+                map.getCanvas().style.cursor = '';
+            });
+        });
+    </script>
+</body>
+</html>
+    

@@ -1,0 +1,52 @@
+[
+  {
+    "nombre": "Clinica Las Kalas",
+    "lat": -15.8431191,
+    "lon": -70.0233202
+  },
+  {
+    "nombre": "4 de Noviembre",
+    "lat": -15.8248667,
+    "lon": -70.0290317
+  },
+  {
+    "nombre": "Jose Antonio Encinas",
+    "lat": -15.83875,
+    "lon": -70.035045
+  },
+  {
+    "nombre": "Metropolitano Puno",
+    "lat": -15.8434283,
+    "lon": -70.0213117
+  },
+  {
+    "nombre": "Vallecito",
+    "lat": -15.8294117,
+    "lon": -70.020545
+  },
+  {
+    "nombre": "Centro de Atención de Medicina Complementaria",
+    "lat": -15.8338206,
+    "lon": -70.0269217
+  },
+  {
+    "nombre": "Hospital Manuel Núñez Butrón",
+    "lat": -15.8431432,
+    "lon": -70.0220475
+  },
+  {
+    "nombre": "Centro de Atencion Primaria III Metropolitano de Puno",
+    "lat": -15.8427135,
+    "lon": -70.025694
+  },
+  {
+    "nombre": "Hospital I Clinica Universitaria UNA - EsSalud",
+    "lat": -15.8253702,
+    "lon": -70.0176726
+  },
+  {
+    "nombre": "Sanidad PNP",
+    "lat": -15.8275722,
+    "lon": -70.0342968
+  }
+]

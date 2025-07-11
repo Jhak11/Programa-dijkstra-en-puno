@@ -1,0 +1,29 @@
+<!-- templates/mapa_ubicacion.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Obtener ubicación</title>
+</head>
+<body>
+    <h2>Obteniendo tu ubicación...</h2>
+    <script>
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            fetch('/ubicacion', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    lat: pos.coords.latitude,
+                    lon: pos.coords.longitude
+                })
+            }).then(() => {
+                document.body.innerHTML += '<p>Ubicación enviada correctamente ✅</p>';
+            }).catch(() => {
+                document.body.innerHTML += '<p>Error al enviar ubicación ❌</p>';
+            });
+        }, function(error) {
+            document.body.innerHTML += '<p>Error: ' + error.message + '</p>';
+        });
+    </script>
+</body>
+</html>
