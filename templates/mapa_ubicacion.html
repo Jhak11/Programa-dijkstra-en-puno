@@ -17,9 +17,9 @@
                     lon: pos.coords.longitude
                 })
             }).then(() => {
-                document.body.innerHTML += '<p>Ubicación enviada correctamente ✅</p>';
+                document.body.innerHTML += '<p>Ubicación enviada correctamente </p>';
             }).catch(() => {
-                document.body.innerHTML += '<p>Error al enviar ubicación ❌</p>';
+                document.body.innerHTML += '<p>Error al enviar ubicación </p>';
             });
         }, function(error) {
             document.body.innerHTML += '<p>Error: ' + error.message + '</p>';

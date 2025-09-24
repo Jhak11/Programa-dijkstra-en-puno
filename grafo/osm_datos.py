@@ -52,7 +52,7 @@ def obtener_hospitales():
     Extrae hospitales y clínicas dentro del área urbana de Puno, usando Overpass y un polígono definido manualmente.
     """
     try:
-        print("📡 Buscando hospitales en Puno...")
+        print("Buscando hospitales en Puno...")
 
         # Polígono manual aproximado de la ciudad de Puno (en orden horario o antihorario)
         polygon = Polygon([
@@ -99,11 +99,11 @@ def obtener_hospitales():
                         "lon": round(lon, 8)
                     })
 
-        print(f"✅ {len(hospitales)} hospitales encontrados en Puno")
+        print(f"{len(hospitales)} hospitales encontrados en Puno")
         return hospitales
 
     except Exception as e:
-        print(f"❌ Error al obtener hospitales: {e}")
+        print(f" Error al obtener hospitales: {e}")
         return []
 
 def guardar_hospitales(hospitales, archivo='datos/hospitales.json'):
@@ -117,7 +117,7 @@ def guardar_hospitales(hospitales, archivo='datos/hospitales.json'):
         print(f"💾 Hospitales guardados en {archivo}")
         return True
     except Exception as e:
-        print(f"❌ Error al guardar hospitales: {e}")
+        print(f" Error al guardar hospitales: {e}")
         return False
 
 def cargar_hospitales(archivo='datos/hospitales.json'):
@@ -128,13 +128,13 @@ def cargar_hospitales(archivo='datos/hospitales.json'):
         if os.path.exists(archivo):
             with open(archivo, 'r', encoding='utf-8') as f:
                 hospitales = json.load(f)
-            print(f"📂 Hospitales cargados desde {archivo}")
+            print(f" Hospitales cargados desde {archivo}")
             return hospitales
         else:
-            print(f"⚠️ Archivo {archivo} no encontrado")
+            print(f"Archivo {archivo} no encontrado")
             return []
     except Exception as e:
-        print(f"❌ Error al cargar hospitales: {e}")
+        print(f" Error al cargar hospitales: {e}")
         return []
     
 

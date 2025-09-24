@@ -1,4 +1,4 @@
-MAPBOX_API_KEY= "pk.eyJ1IjoiamhhayIsImEiOiJjbWN0bHFiazYwM3o2MmpvZTFvdWx0a3hnIn0.FIhmNofEVuFA01Az4uIo5Q"  
+MAPBOX_API_KEY= "pk.eyJ1IjoiamhhayIsImEiOiJjbWZ5aWpscXcwamhxMmpwcHpkNHgzaWFoIn0.OablogBmNF8rI1_cRk2etQ"  
 
 # Configuración de la ciudad por defecto
 CIUDAD_DEFAULT = "Puno, Peru"

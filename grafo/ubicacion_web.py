@@ -14,7 +14,7 @@ def index():
 def recibir_ubicacion():
     global ubicacion
     ubicacion = request.json
-    print(f"📍 Ubicación actualizada: {ubicacion}")
+    print(f" Ubicación actualizada: {ubicacion}")
     return "OK"
 
 @app.route('/ubicacion', methods=['GET'])
